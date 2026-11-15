@@ -1,6 +1,6 @@
 /* Panel · service worker: abre al instante y sin conexión. Sirve lo guardado y lo refresca por detrás;
    la versión nueva entra la siguiente vez que se abre. Nunca guarda llamadas a GitHub. */
-var CACHE = 'panel-1.0.0';
+var CACHE = 'panel-1.0.1';
 var SHELL = ['./', 'index.html', 'manifest.webmanifest', 'icon-180.png', 'icon-192.png', 'icon-512.png'];
 self.addEventListener('install', function (e) {
   e.waitUntil(caches.open(CACHE).then(function (c) { return c.addAll(SHELL.map(function (u) { return new Request(u, { cache: 'reload' }); })); }).then(function () { return self.skipWaiting(); }));
