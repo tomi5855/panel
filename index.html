@@ -1,0 +1,525 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Panel">
+<meta name="theme-color" content="#E9E4DC">
+<title>Panel</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#13263A;--muted:#4A5B6E;--soft:#34475B;--blue:#2A86C4;--blue-soft:rgba(42,134,196,.45);--accent:#0F6AAD;--warn-bg:rgba(225,154,18,.18);--warn:#7A4F00;--glass:rgba(255,255,255,.4);--line:rgba(19,38,58,.1)}
+*{box-sizing:border-box}
+html,body{margin:0;background:#E9E4DC}
+body{font-family:-apple-system,"SF Pro Text","Inter",system-ui,sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums;min-height:100vh}
+button{font:inherit;color:inherit}
+a{color:var(--accent)}a:hover{color:#0B4F82}
+.bg{position:fixed;inset:0;overflow:hidden;background:#DCE6EE;z-index:0}
+.bg img{position:absolute;left:-12px;top:-12px;width:calc(100% + 24px);height:calc(100% + 24px);object-fit:cover;filter:blur(2px) brightness(1.08);opacity:0;transition:opacity .6s}
+.bg img.on{opacity:1}
+.bg .velo{position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.12),rgba(250,251,252,.1))}
+.wrap{position:relative;z-index:1;max-width:1360px;margin:0 auto;padding:28px;padding-top:max(28px,env(safe-area-inset-top));display:flex;flex-wrap:wrap;gap:20px}
+.glass{background:var(--glass);backdrop-filter:blur(28px) saturate(160%);-webkit-backdrop-filter:blur(28px) saturate(160%);border:1px solid rgba(255,255,255,.7);box-shadow:0 14px 40px rgba(30,40,55,.12),inset 0 1px 0 rgba(255,255,255,.9);border-radius:24px}
+aside{flex:1 1 210px;padding:18px;display:flex;flex-direction:column;gap:18px;align-self:flex-start}
+main{flex:999 1 560px;min-width:0;display:flex;flex-direction:column;gap:16px}
+.who{display:flex;align-items:center;gap:10px}
+.av{width:40px;height:40px;border-radius:20px;background:rgba(255,255,255,.75);display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--accent)}
+nav{display:flex;flex-wrap:wrap;gap:6px}
+.nav{flex:1 1 150px;display:flex;align-items:center;gap:10px;height:44px;padding:0 12px;border-radius:14px;text-decoration:none;color:#2C3E52;font-size:15px;font-weight:600}
+.nav:hover{background:rgba(255,255,255,.45);color:var(--ink)}
+.nav.on{background:rgba(255,255,255,.75);color:var(--accent)}
+.sync{font-size:12px;color:var(--muted);line-height:1.4}
+.lbl{font-size:12px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+.g{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:16px}
+.s3{grid-column:span 3}.s4{grid-column:span 4}.s5{grid-column:span 5}.s6{grid-column:span 6}.s7{grid-column:span 7}.s12{grid-column:span 12}
+.card{padding:20px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.rowb{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+h1{margin:2px 0 0;font-size:40px;line-height:1.1;font-weight:700;letter-spacing:-.02em}
+.sub{font-size:15px;font-weight:500;color:#3E5064}
+.big{font-size:38px;font-weight:700;letter-spacing:-.03em;line-height:1}
+.m{font-size:13px;color:var(--muted)}
+.t15{font-size:15px;font-weight:600;line-height:1.3}
+.pill{font-size:11px;font-weight:600;padding:3px 8px;border-radius:10px;background:rgba(255,255,255,.6);color:#2C5A80;white-space:nowrap}
+.warn{font-size:11px;font-weight:600;padding:3px 8px;border-radius:10px;background:var(--warn-bg);color:var(--warn);white-space:nowrap}
+.grey{font-size:11px;font-weight:600;padding:3px 8px;border-radius:10px;background:var(--line);color:var(--soft);white-space:nowrap}
+.tile{padding:12px 14px;border-radius:18px;background:rgba(255,255,255,.45)}
+.hr{height:1px;background:var(--line)}
+.chips{display:flex;flex-wrap:wrap;gap:10px}
+.chip{padding:10px 16px;border-radius:18px;display:flex;align-items:baseline;gap:8px}
+.btn{font-size:14px;font-weight:600;min-height:44px;padding:0 16px;border-radius:22px;border:1px solid rgba(255,255,255,.8);background:rgba(255,255,255,.55);cursor:pointer}
+.btn:hover{background:rgba(255,255,255,.85)}
+.btn.dark{background:var(--ink);border-color:var(--ink);color:#fff}
+.btn.dark:hover{background:#22384F}
+.btn.sel{background:#fff;border:2px solid var(--blue);color:#0F5A8F}
+.btn:disabled{opacity:.35;cursor:default}
+.chk{width:28px;height:28px;flex:none;border-radius:14px;border:1.6px solid rgba(19,38,58,.35);background:rgba(255,255,255,.55);padding:0;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.chk.sel{background:var(--blue);border-color:var(--blue);color:#fff}
+.item{display:flex;gap:12px;align-items:flex-start;padding:7px 0}
+.bar{height:8px;border-radius:4px;background:var(--line)}
+.bar>div{height:8px;border-radius:4px;background:var(--blue)}
+.dots{display:flex;gap:6px;flex-wrap:wrap}
+.dot{width:34px;height:34px;border-radius:17px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600}
+.hb{text-align:left;cursor:pointer;min-height:88px;padding:14px 16px;border-radius:20px;border:2px solid rgba(255,255,255,.75);background:rgba(255,255,255,.5);display:flex;align-items:center;gap:14px}
+.hb:hover{background:rgba(255,255,255,.8)}
+.hb.sel{background:#fff;border-color:var(--blue)}
+.ico{width:44px;height:44px;flex:none;border-radius:22px;display:flex;align-items:center;justify-content:center;background:rgba(42,134,196,.12);color:#1F6FA6}
+.hb.sel .ico{background:var(--blue);color:#fff}
+.back{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 14px;margin-left:-14px;border-radius:22px;text-decoration:none;font-size:14px;font-weight:600;color:var(--ink)}
+.back:hover{background:rgba(255,255,255,.45)}
+.empty{padding:14px;border-radius:18px;background:rgba(255,255,255,.45);font-size:14px;color:var(--soft);line-height:1.45}
+.field{display:flex;flex-direction:column;gap:6px;font-size:14px;font-weight:600}
+.field input,.field select{font:inherit;font-weight:500;height:46px;padding:0 14px;border-radius:14px;border:1px solid rgba(19,38,58,.2);background:rgba(255,255,255,.8);color:var(--ink)}
+.toast{position:fixed;left:50%;bottom:max(24px,env(safe-area-inset-bottom));transform:translateX(-50%);z-index:9;background:var(--ink);color:#fff;padding:12px 18px;border-radius:16px;font-size:14px;font-weight:600;box-shadow:0 10px 30px rgba(0,0,0,.2);max-width:90vw}
+.toast[hidden]{display:none}
+.pild-t{font-size:20px;font-weight:650;line-height:1.3;letter-spacing:-.01em}
+details summary{cursor:pointer;list-style:none}
+details summary::-webkit-details-marker{display:none}
+@media (max-width:1100px){.s3,.s4,.s5,.s7{grid-column:span 6}.s6{grid-column:span 12}}
+@media (max-width:700px){.s3,.s4,.s5,.s6,.s7{grid-column:span 12}.wrap{padding:14px;padding-top:max(14px,env(safe-area-inset-top))}h1{font-size:34px}aside{padding:14px}}
+</style>
+</head>
+<body>
+<div class="bg" aria-hidden="true"><img id="bgimg" alt=""><div class="velo"></div></div>
+<div class="wrap">
+  <aside class="glass">
+    <div class="who">
+      <div class="av" aria-hidden="true">T</div>
+      <div><div style="font-weight:700;font-size:15px">Tomás</div><div class="m" style="font-size:12px">Panel de vida</div></div>
+    </div>
+    <nav id="nav" aria-label="Secciones"></nav>
+    <div class="sync" id="sync"></div>
+  </aside>
+  <main id="main"></main>
+</div>
+<div class="toast" id="toast" role="status" hidden></div>
+<script>
+'use strict';
+var VERSION = '1.0.0';
+var K = { llave: 'panel-llave', repo: 'panel-repo', api: 'panel-api', cache: 'panel-cache-v1', foto: 'panel-foto', bgf: 'panel-bg-file', bgd: 'panel-bg-data' };
+var TRAMOS = [{ id: 'menos-5', t: 'Menos de 5 min', min: 3 }, { id: '5-10', t: '5-10 min', min: 8 }, { id: '10-30', t: '10-30 min', min: 20 }, { id: 'mas-30', t: 'Más de 30 min', min: 40 }];
+var ICO = {
+  hoy: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>',
+  finanzas: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 17l5-5 4 3 8-8"/><path d="M15 7h5v5"/></svg>',
+  trabajo: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="3"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg>',
+  yo: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>',
+  ajustes: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>',
+  check: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>',
+  lectura: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5c3-1 6-1 8 1 2-2 5-2 8-1v14c-3-1-6-1-8 1-2-2-5-2-8-1z"/><path d="M12 6v14"/></svg>',
+  deporte: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="14" cy="4.5" r="2"/><path d="M7 21l3-6 3 2v4"/><path d="M6 12l3-4 4 1 3 3 3 1"/><path d="M10 15l-1-4"/></svg>',
+  escritura: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13 7l4 4"/></svg>',
+  'accion-buena': '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.5-7 10-7 10z"/></svg>',
+  clock: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7A4F00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+  back: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>'
+};
+
+/* ---------- utilidades ---------- */
+function $(id) { return document.getElementById(id); }
+function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+function lsSet(k, v) { try { if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) {} }
+function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+function pad(n) { return n < 10 ? '0' + n : '' + n; }
+function iso(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+function hoyIso() { return iso(new Date()); }
+function parseIso(s) { var p = s.split('-'); return new Date(+p[0], +p[1] - 1, +p[2]); }
+function addDias(s, n) { var d = parseIso(s); d.setDate(d.getDate() + n); return iso(d); }
+function difDias(a, b) { return Math.round((parseIso(b) - parseIso(a)) / 86400000); }
+function lunes(s) { var d = parseIso(s), w = (d.getDay() + 6) % 7; d.setDate(d.getDate() - w); return iso(d); }
+var MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+var MESC = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+var DIAS = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+var LETRAS = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
+function fechaLarga(s) { var d = parseIso(s); return DIAS[d.getDay()] + ', ' + d.getDate() + ' de ' + MESES[d.getMonth()]; }
+function corta(s) { var d = parseIso(s); return d.getDate() + ' ' + MESC[d.getMonth()]; }
+function eur(v, dec) { if (v == null || isNaN(v)) return '—'; var neg = v < 0, a = Math.abs(v), d = dec === 0 ? 0 : 2; var s = a.toFixed(d).split('.'); s[0] = s[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.'); return (neg ? '−' : '') + s.join(',') + ' €'; }
+function pctTxt(v, signo) { if (v == null) return '—'; var s = String(Math.abs(v)).replace('.', ','); return (signo ? (v > 0 ? '+' : v < 0 ? '−' : '') : (v < 0 ? '−' : '')) + s + ' %'; }
+function b64dec(s) { var bin = atob(String(s).replace(/\s/g, '')); var bytes = new Uint8Array(bin.length); for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i); return new TextDecoder().decode(bytes); }
+function b64enc(str) { var bytes = new TextEncoder().encode(str), bin = ''; for (var i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]); return btoa(bin); }
+var tt = null;
+function toast(msg) { var t = $('toast'); t.textContent = msg; t.hidden = false; clearTimeout(tt); tt = setTimeout(function () { t.hidden = true; }, 3200); }
+
+/* ---------- estado ---------- */
+var D = { panel: null, cfg: null, reg: { v: 1, dias: {} }, reac: { v: 1, items: {} }, hechas: { v: 1, items: {} }, sha: {}, sync: null, pend: {} };
+var UI = { sel: {}, tramo: null, acc: {}, verTodo: false };
+(function cargarCache() { try { var c = JSON.parse(lsGet(K.cache) || 'null'); if (c) { D.panel = c.panel; D.cfg = c.cfg; D.reg = c.reg || D.reg; D.reac = c.reac || D.reac; D.hechas = c.hechas || D.hechas; D.sha = c.sha || {}; D.sync = c.sync || null; D.pend = c.pend || {}; } } catch (e) {} })();
+function guardar() { lsSet(K.cache, JSON.stringify({ panel: D.panel, cfg: D.cfg, reg: D.reg, reac: D.reac, hechas: D.hechas, sha: D.sha, sync: D.sync, pend: D.pend })); }
+
+/* ---------- GitHub ---------- */
+function llave() { return lsGet(K.llave) || ''; }
+function repo() { return lsGet(K.repo) || 'tomi5855/panel-datos'; }
+function api() { return lsGet(K.api) || 'https://api.github.com'; }
+function gh(path, opts) {
+  opts = opts || {};
+  var h = { 'Authorization': 'Bearer ' + llave(), 'Accept': 'application/vnd.github+json' };
+  if (opts.body) h['Content-Type'] = 'application/json';
+  return fetch(api() + '/repos/' + repo() + (path ? '/contents/' + path : ''), { method: opts.method || 'GET', headers: h, body: opts.body ? JSON.stringify(opts.body) : undefined, cache: 'no-store' })
+    .then(function (r) {
+      if (r.status === 404) return null;
+      if (r.status === 401 || r.status === 403) throw { code: 'llave' };
+      if (r.status === 409 || r.status === 422) throw { code: 'conflicto' };
+      if (!r.ok) throw { code: 'http', status: r.status };
+      return r.json();
+    });
+}
+function leerJson(path) { return gh(path).then(function (j) { if (!j) return null; D.sha[path] = j.sha; return JSON.parse(b64dec(j.content)); }); }
+function escribirJson(path, obj, msg) {
+  var body = { message: msg, content: b64enc(JSON.stringify(obj, null, 1) + '\n') };
+  if (D.sha[path]) body.sha = D.sha[path];
+  return gh(path, { method: 'PUT', body: body }).then(function (r) { D.sha[path] = r && r.content ? r.content.sha : null; });
+}
+
+/* Guardar con mezcla: se lee lo último, se mezcla lo de este aparato y se sube. Si choca, se reintenta una vez. */
+var ARCHIVOS = { reg: 'habitos/registro.json', reac: 'aprender/reacciones.json', hechas: 'hoy/hechas.json' };
+function mezclar(tipo, remoto) {
+  var loc = D[tipo], out = remoto || (tipo === 'reg' ? { v: 1, dias: {} } : { v: 1, items: {} });
+  if (tipo === 'reg') {
+    Object.keys(loc.dias || {}).forEach(function (f) { out.dias[f] = Object.assign({}, out.dias[f] || {}, loc.dias[f]); Object.keys(out.dias[f]).forEach(function (k) { if (out.dias[f][k] === null) delete out.dias[f][k]; }); });
+  } else {
+    Object.keys(loc.items || {}).forEach(function (k) { out.items[k] = loc.items[k]; });
+  }
+  return out;
+}
+function subir(tipo, msg, intento) {
+  if (!llave()) return Promise.resolve();
+  D.pend[tipo] = msg; guardar();
+  return leerJson(ARCHIVOS[tipo]).then(function (rem) {
+    if (!rem) delete D.sha[ARCHIVOS[tipo]];
+    var m = mezclar(tipo, rem);
+    return escribirJson(ARCHIVOS[tipo], m, msg).then(function () { D[tipo] = m; delete D.pend[tipo]; guardar(); pintarSync(); });
+  }).catch(function (e) {
+    if (e && e.code === 'conflicto' && !intento) return subir(tipo, msg, true);
+    pintarSync('No se ha podido guardar en GitHub; se reintenta al abrir.');
+  });
+}
+var sincronizando = false;
+function sincronizar() {
+  if (!llave() || sincronizando) return Promise.resolve();
+  sincronizando = true; pintarSync('Actualizando…');
+  var pend = Object.keys(D.pend);
+  return Promise.all(pend.map(function (t) { return subir(t, D.pend[t]); }))
+    .then(function () { return Promise.all([leerJson('panel.json'), leerJson('habitos/config.json'), leerJson(ARCHIVOS.reg), leerJson(ARCHIVOS.reac), leerJson(ARCHIVOS.hechas)]); })
+    .then(function (r) {
+      if (!r[0]) throw { code: 'repo' };
+      D.panel = r[0]; D.cfg = r[1]; D.reg = r[2] || { v: 1, dias: {} }; D.reac = r[3] || { v: 1, items: {} }; D.hechas = r[4] || { v: 1, items: {} };
+      D.sync = Date.now(); guardar(); pintar(); fondo();
+    })
+    .catch(function (e) { pintarSync(e && e.code === 'llave' ? 'La llave no vale o ha caducado: ve a Ajustes.' : e && e.code === 'repo' ? 'No encuentro panel.json en el repositorio.' : 'Sin conexión: enseño lo último guardado.'); })
+    .then(function () { sincronizando = false; pintarSync(); });
+}
+function pintarSync(txt) {
+  var el = $('sync'); if (!el) return;
+  if (txt) { el.textContent = txt; return; }
+  if (!llave()) { el.innerHTML = 'Sin conectar. <a href="#ajustes">Conéctalo en Ajustes</a>.'; return; }
+  var p = D.panel ? 'Datos de Claude del ' + corta(D.panel.hoy) : 'Sin datos aún';
+  var s = D.sync ? ' · revisado a las ' + new Date(D.sync).toTimeString().slice(0, 5) : '';
+  el.textContent = p + s + (Object.keys(D.pend).length ? ' · cambios por subir' : '');
+}
+
+/* ---------- fondo ---------- */
+function fondo() {
+  var lista = (D.panel && D.panel.fondos) || [];
+  if (!lista.length || !llave()) return;
+  var pref = lsGet(K.foto) || 'Del día (al azar)', f = null;
+  lista.forEach(function (x) { if (x.n === pref) f = x; });
+  if (!f) { var dia = Math.floor((Date.now() + 3600000) / 86400000); f = lista[((dia * 2654435761) >>> 0) % lista.length]; }
+  var img = $('bgimg');
+  img.style.objectPosition = f.pos || '50% 50%';
+  if (lsGet(K.bgf) === f.f && lsGet(K.bgd)) { if (img.src !== lsGet(K.bgd)) img.src = lsGet(K.bgd); img.classList.add('on'); return; }
+  gh('fondos/' + f.f).then(function (j) {
+    if (!j) return;
+    var data = 'data:image/jpeg;base64,' + String(j.content).replace(/\s/g, '');
+    img.src = data; img.classList.add('on');
+    lsSet(K.bgd, null); lsSet(K.bgf, f.f); lsSet(K.bgd, data);
+  }).catch(function () {});
+}
+(function fondoCache() { var d = lsGet(K.bgd); if (d) { var img = $('bgimg'); img.src = d; img.classList.add('on'); } })();
+
+/* ---------- hábitos: cálculos ---------- */
+function habitos() { return (D.cfg && D.cfg.habitos) || [{ id: 'lectura', nombre: 'Lectura', dias_semana: 7 }, { id: 'deporte', nombre: 'Deporte', dias_semana: 6 }, { id: 'escritura', nombre: 'Escritura', dias_semana: 7 }, { id: 'accion-buena', nombre: 'Acción buena', dias_semana: 7 }]; }
+function hecho(fecha, id) { var d = D.reg.dias && D.reg.dias[fecha]; return !!(d && d[id]); }
+function semana(lun, id) { var n = 0; for (var i = 0; i < 7; i++) if (hecho(addDias(lun, i), id)) n++; return n; }
+function minutosSemana(lun) { var m = 0; for (var i = 0; i < 7; i++) { var d = D.reg.dias && D.reg.dias[addDias(lun, i)]; if (d && d.lectura) { var t = TRAMOS.filter(function (x) { return x.id === d.lectura; })[0]; m += t ? t.min : 0; } } return m; }
+function hayRegistros() { return Object.keys(D.reg.dias || {}).some(function (f) { return Object.keys(D.reg.dias[f] || {}).length > 0; }); }
+
+/* ---------- pintar ---------- */
+function ruta() { var h = (location.hash || '#hoy').slice(1); return ['hoy', 'finanzas', 'trabajo', 'yo', 'habitos', 'ajustes'].indexOf(h) >= 0 ? h : 'hoy'; }
+function pintarNav() {
+  var r = ruta(), act = r === 'habitos' ? 'yo' : r;
+  var items = [['hoy', 'Hoy'], ['finanzas', 'Finanzas'], ['trabajo', 'Trabajo'], ['yo', 'Yo'], ['ajustes', 'Ajustes']];
+  $('nav').innerHTML = items.map(function (x) { return '<a class="nav' + (act === x[0] ? ' on' : '') + '" href="#' + x[0] + '">' + ICO[x[0]] + esc(x[1]) + '</a>'; }).join('');
+}
+function pintar() {
+  pintarNav(); pintarSync();
+  var r = ruta(), m = $('main');
+  if (!llave() && r !== 'ajustes') { m.innerHTML = vistaBienvenida(); return; }
+  if (!D.panel && r !== 'ajustes') { m.innerHTML = '<div class="glass card"><div class="t15">Cargando tus datos…</div><div class="m">La primera vez tarda unos segundos.</div></div>'; return; }
+  m.innerHTML = ({ hoy: vistaHoy, finanzas: vistaFinanzas, trabajo: vistaTrabajo, yo: vistaYo, habitos: vistaHabitos, ajustes: vistaAjustes })[r]();
+}
+function cab(sub, titulo, extra) { return '<header class="rowb" style="align-items:flex-end;padding:4px 4px 0"><div>' + (sub ? '<div class="sub">' + sub + '</div>' : '') + '<h1>' + esc(titulo) + '</h1></div>' + (extra || '') + '</header>'; }
+
+function vistaBienvenida() {
+  return cab('Panel de vida', 'Hola, Tomás') + '<section class="glass card" style="max-width:640px"><div class="t15">Falta conectarlo con tus datos</div><div class="m" style="font-size:14px;line-height:1.5">Pega en Ajustes la llave de GitHub que da acceso a tu repositorio privado <b>panel-datos</b>. Se guarda solo en este aparato.</div><div><a class="btn dark" href="#ajustes" style="display:inline-flex;align-items:center;text-decoration:none">Ir a Ajustes</a></div></section>';
+}
+
+function vistaHoy() {
+  var P = D.panel, hoy = hoyIso(), y = new Date().getFullYear();
+  var anoPct = Math.round((difDias(y + '-01-01', hoy) + 1) / difDias(y + '-01-01', (y + 1) + '-01-01') * 100);
+  var chips = (P.cabecera.proximos || []).map(function (e) { var d = difDias(hoy, e.fecha); return d >= 0 ? '<div class="glass chip"><span style="font-size:24px;font-weight:700">' + d + '</span><span class="m">' + esc(e.t) + '</span></div>' : ''; }).join('');
+  chips += '<div class="glass chip" style="align-items:center"><span style="font-size:24px;font-weight:700">' + anoPct + ' %</span><div style="width:70px"><div class="bar" style="height:5px"><div style="width:' + anoPct + '%;height:5px"></div></div><div class="m" style="font-size:12px;margin-top:3px">de ' + y + '</div></div></div>';
+  var h = cab(esc(fechaLarga(hoy)), 'Hoy', '<div class="chips">' + chips + '</div>');
+  h += '<div class="g">' + cardAgenda(P, hoy) + cardAccion(P) + cardGasto(P) + cardHabitosHoy() + cardPildora(P) + '</div>';
+  return h;
+}
+function cardAgenda(P, hoy) {
+  var A = P.agenda || {}, deHoy = P.hoy === hoy;
+  var h = '<section class="glass card s4"><div class="row"><span class="lbl">Agenda</span></div>';
+  if (!deHoy) h += '<div class="m">Datos del ' + esc(corta(P.hoy)) + ': aún no han llegado los de hoy.</div>';
+  var hl = (A.hoy || []);
+  if (!hl.length) h += '<div class="empty" style="padding:10px 14px">Hoy no tienes nada en el calendario.</div>';
+  hl.forEach(function (e) { h += '<div style="display:flex;gap:12px;align-items:center"><div style="width:4px;align-self:stretch;border-radius:2px;background:var(--blue)"></div><div><div class="t15" style="font-size:16px">' + esc(e.t) + '</div><div class="m">' + esc(e.hora || '') + (e.sub ? ' · ' + esc(e.sub) : '') + '</div></div></div>'; });
+  h += '<div class="hr"></div><div class="m" style="font-weight:600">Lo importante de la semana</div>';
+  var s = A.semana || [];
+  if (!s.length) h += '<div class="m">Nada marcado como importante.</div>';
+  s.forEach(function (e) { h += '<div style="display:flex;gap:12px;align-items:center"><div style="width:44px;text-align:center;flex:none"><div style="font-size:11px;font-weight:600;color:var(--muted)">' + esc(e.dia) + '</div><div style="font-size:20px;font-weight:700">' + esc(e.num) + '</div></div><div><div class="t15">' + esc(e.t) + '</div><div class="m">' + esc((e.hora ? e.hora + ' · ' : '') + (e.sub || '')) + '</div></div></div>'; });
+  return h + '</section>';
+}
+function cardAccion(P) {
+  var lista = (P.accion || []).filter(function (a) { return !D.hechas.items[a.id]; });
+  var ver = UI.verTodo ? lista : lista.slice(0, 5), n = Object.keys(UI.acc).filter(function (k) { return UI.acc[k]; }).length;
+  var h = '<section class="glass card s4" style="gap:2px"><div class="row" style="margin-bottom:6px"><span class="lbl">Pide acción</span><span class="pill">' + lista.length + '</span></div>';
+  if (!lista.length) h += '<div class="empty">Nada pendiente. Bien.</div>';
+  ver.forEach(function (a) { var s = !!UI.acc[a.id]; h += '<div class="item"><button class="chk' + (s ? ' sel' : '') + '" data-act="acc" data-id="' + esc(a.id) + '" aria-pressed="' + s + '" aria-label="Marcar como hecha: ' + esc(a.t) + '">' + (s ? ICO.check : '') + '</button><div><div class="t15">' + esc(a.t) + '</div><div class="m" style="margin-top:2px">' + esc(a.sub || '') + '</div></div></div>'; });
+  if (lista.length > 5) h += '<button class="btn" data-act="vertodo" style="margin-top:6px">' + (UI.verTodo ? 'Ver menos' : 'Ver todo (' + lista.length + ')') + '</button>';
+  if (n) h += '<button class="btn dark" data-act="acc-ok" style="margin-top:8px">✓ Hecho (' + n + ')</button>';
+  return h + '</section>';
+}
+function cardGasto(P, ancho) {
+  var G = P.gasto, max = 0; (G.cats || []).forEach(function (c) { if (c.v > max) max = c.v; });
+  var h = '<section class="glass card ' + (ancho || 's4') + '" style="gap:10px"><div class="row"><span class="lbl">Gastado en ' + esc(G.mes) + '</span><a class="btn" href="https://tomi5855.github.io/caja/" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;text-decoration:none;min-height:36px;font-size:13px">Abrir Caja</a></div>';
+  h += '<div class="big">' + eur(G.total) + '</div>';
+  if (G.anterior) h += '<div class="m">' + esc(G.anterior.mes.charAt(0).toUpperCase() + G.anterior.mes.slice(1)) + (G.anterior.parcial ? ' a estas alturas: ' : ': ') + eur(G.anterior.v) + (G.anterior.pct != null ? ' · ' + pctTxt(G.anterior.pct, true) : '') + '</div>';
+  h += '<div style="display:flex;flex-direction:column;gap:8px;margin-top:4px">';
+  (G.cats || []).slice(0, ancho ? 12 : 5).forEach(function (c) {
+    var ref = c.tope || max, w = ref ? Math.max(2, Math.min(100, Math.round(c.v / ref * 100))) : 0, col = c.tope && c.v / c.tope >= 0.8 ? '#C9A24A' : 'var(--blue)';
+    h += '<div style="display:grid;grid-template-columns:90px minmax(0,1fr) 72px;gap:10px;align-items:center;font-size:13px"><span style="font-weight:500">' + esc(c.n) + '</span><div class="bar" title="' + esc(c.n + ': ' + eur(c.v) + (c.tope ? ' de ' + eur(c.tope) : '')) + '"><div style="width:' + w + '%;background:' + col + '"></div></div><span style="text-align:right;color:var(--muted)">' + eur(c.v) + '</span></div>';
+  });
+  h += '</div>';
+  if (G.juego && G.juego.n) h += '<div class="m">Juego, en neto: ' + (G.juego.neto >= 0 ? '+' : '') + eur(G.juego.neto) + ' (' + G.juego.n + ' apuntes)</div>';
+  return h + '</section>';
+}
+function cardHabitosHoy() {
+  var hoy = hoyIso(), lun = lunes(hoy), idx = difDias(lun, hoy);
+  var h = '<section class="glass card s7"><div class="row"><span class="lbl">Hábitos · esta semana</span><a href="#habitos" style="font-size:13px;font-weight:600;text-decoration:none">Apuntar y gráficos</a></div>';
+  habitos().forEach(function (x) {
+    var dots = '';
+    for (var i = 0; i < 7; i++) {
+      var f = addDias(lun, i), ok = hecho(f, x.id), st;
+      if (ok) st = 'background:var(--blue);color:#fff';
+      else if (i === idx) st = 'background:rgba(255,255,255,.75);border:2px solid var(--blue)';
+      else if (i > idx) st = 'border:1px dashed rgba(19,38,58,.3);color:var(--muted)';
+      else st = 'background:rgba(255,255,255,.5);border:1px solid rgba(19,38,58,.18);color:var(--muted)';
+      dots += '<div class="dot" style="' + st + '" title="' + esc(x.nombre + ', ' + DIAS[parseIso(f).getDay()].toLowerCase() + ': ' + (ok ? 'hecho' : 'sin apuntar')) + '">' + LETRAS[i] + '</div>';
+    }
+    h += '<div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px"><div style="flex:1 1 130px"><div class="t15">' + esc(x.nombre) + '</div><div class="m">' + semana(lun, x.id) + ' de ' + x.dias_semana + '</div></div><div class="dots">' + dots + '</div></div>';
+  });
+  return h + '</section>';
+}
+function cardPildora(P) {
+  var p = P.pildora; if (!p) return '<section class="glass card s5"><span class="lbl">Píldora del día</span><div class="empty">Hoy no ha llegado píldora.</div></section>';
+  var r = D.reac.items[p.id], niv = r && r.nivel;
+  function b(n, t) { return '<button class="btn' + (niv === n ? ' sel' : n === 'mucho' && !niv ? ' dark' : '') + '" data-act="reac" data-n="' + n + '">' + t + '</button>'; }
+  return '<section class="glass card s5" style="gap:10px"><div class="row"><span class="lbl">Píldora del día</span><span class="pill">' + esc(p.tema) + '</span></div><div class="pild-t">' + esc(p.titulo) + '</div><div style="font-size:14px;line-height:1.5;color:var(--soft)">' + esc(p.texto) + '</div>' + (p.fuente ? '<div class="m">Fuente: ' + (p.fuente.url ? '<a href="' + esc(p.fuente.url) + '" target="_blank" rel="noopener">' + esc(p.fuente.t) + '</a>' : esc(p.fuente.t)) + '</div>' : '') + '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px">' + b('no', 'No me interesa') + b('si', 'Me interesa') + b('mucho', 'Me interesa mucho') + '</div>' + (niv === 'mucho' ? '<div class="m">Va a tu correo del domingo y vuelve como repaso en 3 días.</div>' : '') + '</section>';
+}
+
+function vistaFinanzas() {
+  var F = D.panel.finanzas, P = D.panel;
+  var cols = { indexados: '#2A86C4', liquidez: '#9CC9E6', swing: '#34506B' };
+  var h = cab('Tres capitales, sin mezclar', 'Finanzas');
+  h += '<div class="g"><section class="glass card s12" style="flex-direction:row;flex-wrap:wrap;gap:20px 36px"><div style="flex:1 1 300px;display:flex;flex-direction:column;gap:14px"><div class="row"><span class="lbl">Patrimonio</span><span class="m" style="font-size:12px">' + esc(corta(F.patrimonio.fecha)) + '</span></div><div class="big">' + eur(F.patrimonio.total, 0) + '</div>';
+  h += '<div style="display:flex;height:12px;border-radius:6px;overflow:hidden;gap:3px">' + F.reparto.map(function (r) { return '<div style="width:' + r.pct + '%;background:' + cols[r.id] + '" title="' + esc(r.n + ': ' + pctTxt(r.pct)) + '"></div>'; }).join('') + '</div><div style="display:flex;flex-direction:column;gap:8px">';
+  F.reparto.forEach(function (r) { h += '<div class="row" style="font-size:14px"><span style="display:flex;align-items:center;gap:8px"><span style="width:10px;height:10px;border-radius:5px;background:' + cols[r.id] + '"></span>' + esc(r.n) + '</span><span><strong>' + pctTxt(r.pct) + '</strong>' + (r.objetivo ? ' <span class="m">· objetivo ' + r.objetivo + '</span>' : '') + '</span></div>'; });
+  h += '</div></div><div style="flex:2 1 420px;display:flex;flex-direction:column;gap:8px">' + graficoEvolucion(F.evolucion) + '</div></section>';
+  var I = F.indexados;
+  h += '<section class="glass card s4"><div class="row"><span class="lbl">Indexados · MyInvestor</span><span class="m" style="font-size:12px">' + (I.fecha ? esc(corta(I.fecha)) : '') + '</span></div><div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap"><span style="font-size:32px;font-weight:700;letter-spacing:-.02em">' + pctTxt(I.pct, true) + '</span><span class="m" style="font-size:14px">' + eur(I.valor) + '</span></div><div class="m" style="font-size:12px;margin-top:-6px">desde que compraste</div>';
+  (I.fondos || []).forEach(function (f) { h += '<div class="row" style="font-size:14px"><span style="font-weight:500">' + esc(f.n.replace(/^(Fidelity|MyInvestor) /, '').replace(' Index (USD)', '')) + '</span><span style="font-weight:600">' + pctTxt(f.pct, true) + '</span></div>'; });
+  h += '<div class="hr"></div>' + (I.proxima ? '<div class="row" style="font-size:13px"><span class="m">Próxima aportación</span><span style="font-weight:600">día ' + I.proxima.dia + ' · ' + esc(I.proxima.fondo) + '</span></div>' : '') + (I.sinInvertir != null ? '<div class="row" style="font-size:13px"><span class="m">Sin invertir en la cuenta</span><span style="font-weight:600">' + eur(I.sinInvertir) + '</span></div>' : '') + '</section>';
+  var W = F.swing;
+  h += '<section class="glass card s4"><div class="row"><span class="lbl">Swing · IBKR</span><span class="m" style="font-size:12px">' + (W.fecha ? esc(corta(W.fecha)) : '') + '</span></div><div style="font-size:30px;font-weight:700;letter-spacing:-.02em">' + eur(W.valor) + '</div><div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px">' + [[W.riesgo, 'riesgo abierto'], [W.efectivoPct, 'efectivo'], [W.financieras, 'financieras']].map(function (x) { return '<div class="tile" style="padding:10px 12px"><div style="font-size:17px;font-weight:700">' + esc(x[0] || '—') + '</div><div class="m" style="font-size:12px">' + x[1] + '</div></div>'; }).join('') + '</div>';
+  (W.posiciones || []).forEach(function (p) { h += '<div class="row"><div><div style="font-size:15px;font-weight:700">' + esc(p.t) + '</div><div class="m" style="font-size:12px">' + esc(p.alerta) + '</div></div><span class="' + (p.aviso ? 'warn' : 'pill') + '">' + esc(p.estado) + '</span></div>'; });
+  if (W.fuenteRevision) h += '<div class="m" style="font-size:12px">Stops y riesgo: ' + esc(W.fuenteRevision) + '</div>';
+  h += '</section>';
+  var L = F.liquidez, sobre = L.efectivo != null && L.colchon ? L.efectivo - L.colchon : null, pas = L.invertido > L.tope;
+  h += '<section class="glass card s4"><div class="row"><span class="lbl">Liquidez · Trade Republic</span></div><div style="display:flex;align-items:baseline;gap:10px"><span style="font-size:30px;font-weight:700;letter-spacing:-.02em">' + eur(L.efectivo, 0) + '</span><span class="m" style="font-size:14px">en efectivo</span></div>';
+  if (L.colchon) h += '<div><div class="row" style="font-size:13px;margin-bottom:6px"><span>Colchón de ' + eur(L.colchon, 0) + ' que no se toca</span><span style="font-weight:600">' + (sobre >= 0 ? 'cubierto' : 'falta ' + eur(-sobre, 0)) + '</span></div><div class="bar"><div style="width:' + Math.min(100, Math.round(L.efectivo / L.colchon * 100)) + '%"></div></div>' + (sobre > 0 ? '<div class="m" style="font-size:12px;margin-top:5px">' + eur(sobre, 0) + ' por encima, disponibles en 1 día</div>' : '') + '</div>';
+  h += '<div><div class="row" style="font-size:13px;margin-bottom:6px"><span>Invertido en trades oportunistas</span><span class="' + (pas ? 'warn' : 'pill') + '">' + pctTxt(L.invertidoPct) + ' · tope ' + L.topePct + ' %</span></div><div class="bar" style="position:relative"><div style="width:' + Math.min(100, Math.round(L.invertido / Math.max(L.invertido, L.tope) * 100)) + '%;background:' + (pas ? '#C9A24A' : 'var(--blue)') + '"></div><div style="position:absolute;left:' + Math.round(L.tope / Math.max(L.invertido, L.tope) * 100) + '%;top:-4px;width:2px;height:16px;background:var(--ink)"></div></div><div class="m" style="font-size:12px;margin-top:5px">' + eur(L.invertido) + ' frente a un tope de ' + eur(L.tope, 0) + '</div></div>';
+  if (L.remuneracion) h += '<div class="row" style="font-size:13px"><span class="m">Remuneración</span><span style="font-weight:600">' + esc(L.remuneracion) + '</span></div>';
+  (L.otras || []).forEach(function (o) { h += '<div class="row" style="font-size:13px"><span class="m">' + esc(o.n) + '</span><span style="font-weight:600">' + eur(o.v) + '</span></div>'; });
+  h += '</section>';
+  h += '<section class="glass card s5"><span class="lbl">Pendiente con bancos</span>';
+  if (!(F.pendientes || []).length) h += '<div class="empty">Nada pendiente.</div>';
+  (F.pendientes || []).forEach(function (p) { h += '<div class="row" style="font-size:15px"><span>' + esc(p.t) + '</span><span class="' + (p.aviso ? 'warn' : 'pill') + '">' + esc(p.v) + '</span></div>'; });
+  h += '</section>' + cardGasto(P, 's7') + '</div>';
+  return h;
+}
+function graficoEvolucion(ev) {
+  if (!ev || ev.length < 2) return '<span class="lbl">Evolución, en %</span><div class="empty">Aún no hay suficientes datos.</div>';
+  var ult = ev[ev.length - 1], lim = 5;
+  ev.forEach(function (p) { if (Math.abs(p.pct) > lim) lim = Math.ceil(Math.abs(p.pct)); });
+  var W = 600, H = 170, x0 = 44, top = 18, bot = 140, n = ev.length;
+  function X(i) { return x0 + (W - x0 - 10) * i / (n - 1); }
+  function Y(v) { return top + (bot - top) * (lim - v) / (2 * lim); }
+  var pts = ev.map(function (p, i) { return X(i).toFixed(1) + ',' + Y(p.pct).toFixed(1); }).join(' ');
+  var hits = ev.map(function (p, i) { return '<circle cx="' + X(i).toFixed(1) + '" cy="' + Y(p.pct).toFixed(1) + '" r="9" fill="transparent"><title>' + esc(corta(p.f) + ': ' + pctTxt(p.pct, true)) + '</title></circle>'; }).join('');
+  var s = '<div class="rowb"><span class="lbl">Evolución, en %</span><span class="m" style="font-size:12px">desde el ' + esc(corta(ev[0].f)) + '</span></div><div style="display:flex;align-items:baseline;gap:10px"><span style="font-size:30px;font-weight:700">' + pctTxt(ult.pct, true) + '</span><span class="m" style="font-size:14px">desde el ' + esc(corta(ev[0].f)) + '</span></div>';
+  s += '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Evolución del patrimonio en porcentaje desde el ' + esc(corta(ev[0].f)) + ': hoy ' + esc(pctTxt(ult.pct, true)) + '" style="width:100%;height:auto">';
+  s += '<line x1="' + x0 + '" y1="' + top + '" x2="' + W + '" y2="' + top + '" stroke="rgba(19,38,58,.08)"/><line x1="' + x0 + '" y1="' + Y(0) + '" x2="' + W + '" y2="' + Y(0) + '" stroke="rgba(19,38,58,.3)"/><line x1="' + x0 + '" y1="' + bot + '" x2="' + W + '" y2="' + bot + '" stroke="rgba(19,38,58,.08)"/>';
+  s += '<text x="0" y="' + (top + 4) + '" font-size="12" fill="#4A5B6E">+' + lim + ' %</text><text x="0" y="' + (Y(0) + 4) + '" font-size="12" fill="#4A5B6E">0 %</text><text x="0" y="' + (bot + 4) + '" font-size="12" fill="#4A5B6E">−' + lim + ' %</text>';
+  s += '<polyline points="' + pts + '" fill="none" stroke="#2A86C4" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><circle cx="' + X(n - 1).toFixed(1) + '" cy="' + Y(ult.pct).toFixed(1) + '" r="5" fill="#2A86C4" stroke="#fff" stroke-width="2"/>' + hits;
+  s += '<text x="' + x0 + '" y="164" font-size="12" fill="#4A5B6E">' + esc(corta(ev[0].f)) + '</text><text x="' + W + '" y="164" font-size="12" fill="#4A5B6E" text-anchor="end">' + esc(corta(ult.f)) + '</text></svg>';
+  return s;
+}
+
+function vistaTrabajo() {
+  var T = D.panel.trabajo || {}, hoy = hoyIso(), h = cab('codeX y lo tuyo', 'Trabajo') + '<div class="g">';
+  var Sm = T.semanaCodex;
+  if (Sm) h += '<section class="glass card s6"><div class="row"><span class="lbl">codeX · semana pasada</span><span class="m" style="font-size:12px">' + esc(Sm.rango) + '</span></div><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px">' + [[Sm.llamadas, 'llamadas'], [Sm.decisor, 'con decisor'], [Sm.fijadas, 'reuniones fijadas'], [Sm.hechas, 'reuniones hechas']].map(function (x) { return '<div class="tile"><div style="font-size:24px;font-weight:700">' + esc(x[0]) + '</div><div class="m" style="font-size:12px">' + x[1] + '</div></div>'; }).join('') + '</div><div style="font-size:14px;color:var(--soft)">' + esc(Sm.nota || '') + '</div>' + (T.estaSemana ? '<div class="tile" style="font-size:14px"><b>Esta semana:</b> ' + esc(T.estaSemana) + '</div>' : '') + '</section>';
+  h += '<section class="glass card s6" style="gap:2px"><div class="row" style="margin-bottom:6px"><span class="lbl">A medias</span><span class="pill">' + (T.aMedias || []).length + '</span></div>' + (T.aMedias || []).map(function (a) { return '<div class="row" style="align-items:flex-start;padding:7px 0"><div><div class="t15">' + esc(a.t) + '</div><div class="m" style="margin-top:2px">' + esc(a.sub || '') + '</div></div><span class="pill">' + esc(a.tag || '') + '</span></div>'; }).join('') + '</section>';
+  h += '<section class="glass card s4"><div style="display:flex;align-items:center;gap:8px">' + ICO.clock + '<span class="lbl">Se te escapa</span></div>' + ((T.seEscapa || []).length ? '' : '<div class="empty">Nada parado.</div>') + (T.seEscapa || []).map(function (a) { var d = a.desde ? difDias(a.desde, hoy) : null; return '<div class="row"><div><div class="t15">' + esc(a.t) + '</div><div class="m">' + esc(a.sub || '') + '</div></div>' + (d != null ? '<span class="warn">' + d + ' días</span>' : '') + '</div>'; }).join('') + '</section>';
+  h += '<section class="glass card s4"><span class="lbl">Lo tuyo</span>' + (T.proyectos || []).map(function (p) { return '<div class="row"><div><div class="t15">' + esc(p.n) + '</div><div class="m">' + esc(p.d || '') + '</div></div><span class="' + (p.e === 'en marcha' ? 'pill' : p.e === 'parado' ? 'warn' : 'grey') + '">' + esc(p.e) + '</span></div>'; }).join('') + '</section>';
+  h += '<section class="glass card s4"><div class="row"><span class="lbl">Ideas en desarrollo</span><span style="font-size:13px;font-weight:600;color:var(--accent)">Aparcadas · ' + (T.aparcadas || []).length + '</span></div>' + (T.ideas || []).map(function (i) { return '<div class="tile"><div class="t15">' + esc(i.t) + '</div><div class="m" style="margin-top:2px">' + esc(i.sub || '') + '</div></div>'; }).join('') + '</section>';
+  return h + '</div>';
+}
+
+function vistaYo() {
+  var Y = D.panel.yo || {}, hoy = hoyIso(), lun = lunes(hoy), h = cab('Hábitos, aprender y salud', 'Yo') + '<div class="g">';
+  var c = 2 * Math.PI * 40;
+  h += '<section class="glass card s6" style="gap:16px"><div class="row"><span class="lbl">Hábitos · esta semana</span><a href="#habitos" style="font-size:13px;font-weight:600;text-decoration:none">Apuntar y gráficos</a></div><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px">';
+  habitos().forEach(function (x) { var n = semana(lun, x.id), f = Math.min(1, n / x.dias_semana) * c; h += '<a href="#habitos" style="display:flex;flex-direction:column;align-items:center;gap:6px;text-decoration:none;color:inherit"><div style="position:relative;width:96px;height:96px"><svg width="96" height="96" viewBox="0 0 96 96" aria-hidden="true"><circle cx="48" cy="48" r="40" fill="none" stroke="rgba(19,38,58,.1)" stroke-width="9"/><circle cx="48" cy="48" r="40" fill="none" stroke="#5BBCF2" stroke-width="9" stroke-linecap="round" stroke-dasharray="' + f.toFixed(1) + ' ' + c.toFixed(1) + '" transform="rotate(-90 48 48)"/></svg><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:21px;font-weight:700">' + n + '/' + x.dias_semana + '</div></div><div style="font-size:14px;font-weight:600;text-align:center">' + esc(x.nombre) + '</div></a>'; });
+  h += '</div><a class="btn dark" href="#habitos" style="display:flex;align-items:center;justify-content:center;text-decoration:none">Apuntar lo de hoy</a></section>';
+  var items = Object.keys(D.reac.items).map(function (k) { var r = D.reac.items[k]; r.id = k; return r; });
+  var mucho = items.filter(function (r) { return r.nivel === 'mucho'; }).sort(function (a, b) { return a.fecha < b.fecha ? -1 : 1; });
+  var repaso = mucho.filter(function (r) { return difDias(r.fecha, hoy) >= 3 && !r.repasado; })[0];
+  var semanaMucho = mucho.filter(function (r) { return r.fecha >= lun; });
+  h += '<section class="glass card s6"><span class="lbl">Aprender</span>';
+  if (repaso) h += '<details class="tile" style="background:rgba(255,255,255,.6)"><summary><div style="font-size:12px;font-weight:600;color:#2C5A80">REPASO · DE HACE ' + difDias(repaso.fecha, hoy) + ' DÍAS</div><div class="t15" style="font-size:16px;margin-top:4px">' + esc(repaso.titulo) + '</div><div class="m" style="margin-top:4px">Tócalo para recordar de qué iba</div></summary><div style="font-size:14px;line-height:1.5;color:var(--soft);margin-top:8px">' + esc(repaso.texto || '') + '</div><button class="btn" data-act="repasado" data-id="' + esc(repaso.id) + '" style="margin-top:8px">Repasado</button></details>';
+  h += '<div class="m" style="font-weight:600">Te interesaron mucho esta semana · van al correo del domingo</div>';
+  if (!semanaMucho.length) h += '<div class="empty" style="padding:10px 14px">Todavía ninguna. Marca «Me interesa mucho» en la píldora de Hoy.</div>';
+  semanaMucho.forEach(function (r) { h += '<div><div class="t15">' + esc(r.titulo) + '</div><div class="m">' + esc(r.tema || '') + '</div></div>'; });
+  h += '<div class="m" style="font-weight:600;margin-top:4px">Tus temas</div><div style="display:flex;flex-wrap:wrap;gap:8px">' + (Y.temas || []).map(function (t) { return '<span class="pill" style="font-size:13px;padding:8px 12px">' + esc(t) + '</span>'; }).join('') + '</div></section>';
+  var Lc = Y.lecturas || {};
+  h += '<section class="glass card s6"><span class="lbl">Lecturas</span>' + ((Lc.leyendo || []).length ? (Lc.leyendo || []).map(function (b) { return '<div class="tile"><div class="t15">' + esc(b.t) + '</div><div class="m">' + esc(b.autor || '') + '</div></div>'; }).join('') : '<div class="empty">Aún no hay libros cargados. Cuando los cargues, aquí verás el que estás leyendo, cuánto llevas y los que has terminado este año.</div>') + '<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px"><div class="tile"><div style="font-size:20px;font-weight:700">' + ((Lc.leyendo || []).length || '—') + '</div><div class="m" style="font-size:12px">leyendo ahora</div></div><div class="tile"><div style="font-size:20px;font-weight:700">' + ((Lc.terminados || []).length || '—') + '</div><div class="m" style="font-size:12px">terminados este año</div></div><div class="tile"><div style="font-size:20px;font-weight:700">' + ((Lc.espera || []).length || '—') + '</div><div class="m" style="font-size:12px">en lista de espera</div></div></div></section>';
+  var Sa = Y.salud;
+  if (Sa) h += '<section class="glass card s6"><div class="row"><span class="lbl">Salud</span><span class="pill">más adelante</span></div><div style="display:flex;align-items:baseline;gap:10px"><span style="font-size:36px;font-weight:700;letter-spacing:-.02em">' + Math.max(0, difDias(hoy, Sa.fecha)) + ' días</span><span class="m" style="font-size:14px">al ' + esc(Sa.titulo) + '</span></div><div style="font-size:15px;line-height:1.45;color:var(--soft)">' + esc(Sa.texto) + '</div><div class="tile m" style="font-size:14px">' + esc(Sa.nota || '') + '</div></section>';
+  return h + '</div>';
+}
+
+function vistaHabitos() {
+  var hoy = hoyIso(), lun = lunes(hoy), H = habitos(), sel = UI.sel;
+  var marcados = Object.keys(sel).filter(function (k) { return sel[k]; }), falta = sel.lectura && !UI.tramo;
+  var h = '<header style="padding:4px 4px 0"><a class="back" href="#yo">' + ICO.back + 'Yo</a><h1 style="margin:0">Hábitos</h1></header><div class="g">';
+  h += '<section class="glass card s12" style="gap:14px"><div class="rowb"><span class="lbl">Apuntar hoy · ' + esc(fechaLarga(hoy).toLowerCase()) + '</span><span class="m">Toca lo que has hecho y pulsa ✓</span></div><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px">';
+  H.forEach(function (x) {
+    var on = !!sel[x.id], ya = D.reg.dias[hoy] && D.reg.dias[hoy][x.id], estado = on ? 'Marcado' : ya ? 'Hecho hoy' + (x.id === 'lectura' && typeof ya === 'string' ? ' · ' + (TRAMOS.filter(function (t) { return t.id === ya; })[0] || {}).t : '') : 'Toca para marcar';
+    h += '<button class="hb' + (on ? ' sel' : '') + '" data-act="hab" data-id="' + esc(x.id) + '" aria-pressed="' + on + '"><span class="ico">' + (ICO[x.id] || ICO.check) + '</span><span><span style="display:block;font-size:17px;font-weight:700">' + esc(x.nombre) + '</span><span class="m" style="display:block">' + esc(estado) + '</span></span></button>';
+  });
+  h += '</div>';
+  if (sel.lectura) h += '<div class="tile" style="display:flex;flex-wrap:wrap;align-items:center;gap:8px"><span style="font-size:15px;font-weight:600;margin-right:6px">¿Cuánto has leído?</span>' + TRAMOS.map(function (t) { return '<button class="btn' + (UI.tramo === t.id ? ' sel' : '') + '" data-act="tramo" data-id="' + t.id + '">' + t.t + '</button>'; }).join('') + '</div>';
+  h += '<div style="display:flex;flex-wrap:wrap;align-items:center;gap:14px"><button class="btn dark" data-act="hab-ok" style="min-height:48px;padding:0 22px;font-size:15px"' + (!marcados.length || falta ? ' disabled' : '') + '>✓ Apuntar' + (marcados.length ? ' (' + marcados.length + ')' : '') + '</button><span class="m" style="font-size:14px">' + (falta ? 'Elige cuánto has leído.' : marcados.length ? 'Pulsa ✓ para guardar.' : 'Toca lo que has hecho hoy.') + '</span></div></section>';
+  var semanas = []; for (var w = 7; w >= 0; w--) semanas.push(addDias(lun, -7 * w));
+  var hay = hayRegistros();
+  H.forEach(function (x) {
+    var ult = 0, ant = 0; for (var i = 4; i < 8; i++) ult += semana(semanas[i], x.id); for (i = 0; i < 4; i++) ant += semana(semanas[i], x.id);
+    var mes = Math.round(ult / (x.dias_semana * 4) * 100), antes = Math.round(ant / (x.dias_semana * 4) * 100), dif = mes - antes;
+    h += '<section class="glass card s3" style="gap:10px"><div class="rowb"><span style="font-size:17px;font-weight:700">' + esc(x.nombre) + '</span><span class="m" style="font-size:12px">objetivo ' + x.dias_semana + ' días</span></div><div style="display:flex;align-items:baseline;gap:8px"><span style="font-size:32px;font-weight:700;letter-spacing:-.02em">' + semana(lun, x.id) + ' de ' + x.dias_semana + '</span><span class="m">esta semana</span></div><div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px"><div class="tile"><div style="font-size:17px;font-weight:700">' + (hay ? mes + ' %' : '—') + '</div><div class="m" style="font-size:12px">últimas 4 semanas</div></div><div class="tile"><div style="font-size:17px;font-weight:700">' + (hay && ant ? (dif >= 0 ? '+' : '−') + Math.abs(dif) + ' puntos' : '—') + '</div><div class="m" style="font-size:12px">frente a las 4 anteriores</div></div></div></section>';
+  });
+  if (!hay) return h + '<section class="glass card s12"><span class="lbl">Gráficos</span><div class="empty">Aún no hay registros. En cuanto apuntes unos días, aquí verás los minutos de lectura por semana, el cumplimiento de cada hábito y el mapa de las últimas 12 semanas.</div></section></div>';
+  var mins = semanas.map(function (s) { return minutosSemana(s); }), maxm = Math.max(60, Math.max.apply(null, mins)), media = Math.round(mins.reduce(function (a, b) { return a + b; }, 0) / 8);
+  var svg = '<svg viewBox="0 0 560 200" role="img" aria-label="Minutos de lectura por semana, últimas 8 semanas: ' + mins.join(', ') + '" style="width:100%;height:auto"><line x1="0" y1="170" x2="560" y2="170" stroke="rgba(19,38,58,.25)"/>';
+  mins.forEach(function (m, i) { var hh = Math.max(m ? 4 : 0, m / maxm * 140); svg += '<g><title>' + esc('Semana del ' + corta(semanas[i]) + ': ' + m + ' min') + '</title><rect x="' + (i * 70 + 13) + '" y="' + (170 - hh) + '" width="44" height="' + hh + '" rx="4" fill="' + (i === 7 ? '#2A86C4' : 'rgba(42,134,196,.45)') + '"/><text x="' + (i * 70 + 35) + '" y="190" font-size="12" fill="#4A5B6E" text-anchor="middle">' + esc(corta(semanas[i])) + '</text></g>'; });
+  svg += '<text x="548" y="' + Math.max(14, 170 - mins[7] / maxm * 140 - 6) + '" font-size="13" font-weight="700" fill="#13263A" text-anchor="end">' + mins[7] + '</text></svg>';
+  h += '<section class="glass card s5"><div class="rowb"><span class="lbl">Minutos de lectura por semana</span><span class="m" style="font-size:12px">estimados por tramo</span></div><div style="display:flex;align-items:baseline;gap:10px"><span style="font-size:30px;font-weight:700">' + mins[7] + ' min</span><span class="m" style="font-size:14px">esta semana · media ' + media + '</span></div>' + svg + '</section>';
+  h += '<section class="glass card s7"><div class="rowb"><span class="lbl">Cumplimiento por semana</span><span class="m" style="font-size:12px">% de días hechos sobre el objetivo · 8 semanas</span></div><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px 22px">';
+  H.forEach(function (x) {
+    var vals = semanas.map(function (s) { return Math.min(100, Math.round(semana(s, x.id) / x.dias_semana * 100)); });
+    var b = '<svg viewBox="0 0 320 120" role="img" aria-label="' + esc(x.nombre + ', cumplimiento semanal: ' + vals.join(' %, ') + ' %') + '" style="width:100%;height:auto"><line x1="0" y1="100" x2="320" y2="100" stroke="rgba(19,38,58,.25)"/><line x1="0" y1="20" x2="320" y2="20" stroke="rgba(19,38,58,.1)" stroke-dasharray="3 4"/><text x="0" y="15" font-size="11" fill="#4A5B6E">100 %</text>';
+    vals.forEach(function (v, i) { var hh = Math.max(v ? 4 : 0, v * 0.8); b += '<g><title>' + esc('Semana del ' + corta(semanas[i]) + ': ' + v + ' %') + '</title><rect x="' + (i * 40 + 4) + '" y="' + (100 - hh) + '" width="30" height="' + hh + '" rx="4" fill="' + (i === 7 ? '#2A86C4' : 'rgba(42,134,196,.45)') + '"/></g>'; });
+    b += '<text x="0" y="116" font-size="11" fill="#4A5B6E">' + esc(corta(semanas[0])) + '</text><text x="320" y="116" font-size="11" fill="#4A5B6E" text-anchor="end">esta semana</text></svg>';
+    h += '<div><div class="rowb" style="margin-bottom:4px"><span class="t15">' + esc(x.nombre) + '</span><span class="m">esta semana ' + vals[7] + ' %</span></div>' + b + '</div>';
+  });
+  h += '</div></section><section class="glass card s12"><div class="rowb"><span class="lbl">Últimas 12 semanas, día a día</span><div style="display:flex;gap:14px" class="m"><span style="display:flex;align-items:center;gap:6px"><span style="width:12px;height:12px;border-radius:3px;background:#2A86C4"></span>hecho</span><span style="display:flex;align-items:center;gap:6px"><span style="width:12px;height:12px;border-radius:3px;background:var(--line)"></span>sin hacer</span></div></div><div style="overflow-x:auto"><div style="display:flex;flex-direction:column;gap:10px;min-width:640px">';
+  var ini = addDias(lun, -77);
+  H.forEach(function (x) {
+    h += '<div style="display:grid;grid-template-columns:120px minmax(0,1fr);align-items:center;gap:12px"><span style="font-size:14px;font-weight:600">' + esc(x.nombre) + '</span><div style="display:grid;grid-template-columns:repeat(84,minmax(0,1fr));gap:3px">';
+    for (var i = 0; i < 84; i++) { var f = addDias(ini, i), fut = f > hoy, ok = hecho(f, x.id); h += '<div title="' + esc(corta(f) + ': ' + (fut ? 'por llegar' : ok ? 'hecho' : 'sin hacer')) + '" style="aspect-ratio:1;border-radius:3px;' + (fut ? 'border:1px dashed rgba(19,38,58,.25)' : ok ? 'background:#2A86C4' : 'background:var(--line)') + '"></div>'; }
+    h += '</div></div>';
+  });
+  return h + '</div></div></section></div>';
+}
+
+function vistaAjustes() {
+  var fotos = ((D.panel && D.panel.fondos) || []).map(function (f) { return f.n; }), pref = lsGet(K.foto) || 'Del día (al azar)';
+  var h = cab('Este aparato', 'Ajustes') + '<div class="g"><section class="glass card s6"><span class="lbl">Conexión con tus datos</span><div class="m" style="font-size:14px;line-height:1.5">Tus datos viven en tu repositorio privado de GitHub. La llave se queda solo en este aparato y nunca se envía a otro sitio.</div>';
+  h += '<label class="field">Repositorio<input id="f-repo" autocapitalize="off" autocorrect="off" spellcheck="false" value="' + esc(repo()) + '"></label><label class="field">Llave de GitHub<input id="f-llave" type="password" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="' + (llave() ? 'Llave guardada (déjalo vacío para mantenerla)' : 'github_pat_…') + '"></label><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn dark" data-act="conectar">Conectar</button>' + (llave() ? '<button class="btn" data-act="desconectar">Quitar la llave</button>' : '') + '</div><div class="m" id="f-msg"></div></section>';
+  h += '<section class="glass card s6"><span class="lbl">Fondo</span><label class="field">Foto<select id="f-foto">' + ['Del día (al azar)'].concat(fotos).map(function (n) { return '<option' + (n === pref ? ' selected' : '') + '>' + esc(n) + '</option>'; }).join('') + '</select></label><div class="m">«Del día» cambia sola cada día y es la misma todo el día.</div><div class="m" style="margin-top:8px">Panel ' + VERSION + '</div></section></div>';
+  return h;
+}
+
+/* ---------- acciones ---------- */
+document.addEventListener('click', function (ev) {
+  var b = ev.target.closest('[data-act]'); if (!b) return;
+  var a = b.getAttribute('data-act'), id = b.getAttribute('data-id');
+  if (a === 'acc') { UI.acc[id] = !UI.acc[id]; pintar(); }
+  else if (a === 'vertodo') { UI.verTodo = !UI.verTodo; pintar(); }
+  else if (a === 'acc-ok') {
+    var ids = Object.keys(UI.acc).filter(function (k) { return UI.acc[k]; }), ahora = new Date().toISOString();
+    ids.forEach(function (k) { D.hechas.items[k] = { fecha: ahora }; }); UI.acc = {}; guardar(); pintar();
+    toast(ids.length === 1 ? 'Hecha. Claude la quita de tus pendientes.' : ids.length + ' hechas. Claude las quita de tus pendientes.');
+    subir('hechas', 'panel: hecho en Pide acción');
+  }
+  else if (a === 'reac') {
+    var p = D.panel.pildora, n = b.getAttribute('data-n');
+    D.reac.items[p.id] = { nivel: n, fecha: hoyIso(), tema: p.tema, titulo: p.titulo, texto: p.texto }; guardar(); pintar();
+    toast(n === 'mucho' ? 'Apuntada: va a tu correo del domingo.' : n === 'si' ? 'Apuntado: te interesa.' : 'Apuntado: no te interesa.');
+    subir('reac', 'panel: interés en la píldora');
+  }
+  else if (a === 'repasado') { var r = D.reac.items[id]; if (r) { r.repasado = hoyIso(); guardar(); pintar(); subir('reac', 'panel: píldora repasada'); } }
+  else if (a === 'hab') { UI.sel[id] = !UI.sel[id]; if (id === 'lectura' && !UI.sel[id]) UI.tramo = null; pintar(); }
+  else if (a === 'tramo') { UI.tramo = id; pintar(); }
+  else if (a === 'hab-ok') {
+    var hoy = hoyIso(), ms = Object.keys(UI.sel).filter(function (k) { return UI.sel[k]; });
+    if (!ms.length || (UI.sel.lectura && !UI.tramo)) return;
+    D.reg.dias[hoy] = D.reg.dias[hoy] || {};
+    ms.forEach(function (k) { D.reg.dias[hoy][k] = k === 'lectura' ? UI.tramo : true; });
+    var nombres = ms.map(function (k) { var x = habitos().filter(function (h) { return h.id === k; })[0]; return x ? x.nombre.toLowerCase() : k; });
+    UI.sel = {}; UI.tramo = null; guardar(); pintar();
+    toast('Apuntado: ' + nombres.join(', ') + '.');
+    subir('reg', 'panel: hábitos del ' + hoy);
+  }
+  else if (a === 'conectar') {
+    var tk = $('f-llave').value.trim(), rp = $('f-repo').value.trim().replace(/^https?:\/\/github\.com\//, '').replace(/\.git$/, '').replace(/\/+$/, '');
+    if (!tk && !llave()) { $('f-msg').textContent = 'Pega la llave de GitHub.'; return; }
+    if (!/^[\w.-]+\/[\w.-]+$/.test(rp)) { $('f-msg').textContent = 'El repositorio va como usuario/nombre.'; return; }
+    var antes = llave(); if (tk) lsSet(K.llave, tk); lsSet(K.repo, rp);
+    $('f-msg').textContent = 'Comprobando…';
+    leerJson('panel.json').then(function (j) {
+      if (!j) { $('f-msg').textContent = 'La llave vale, pero no encuentro panel.json en ' + rp + '.'; return; }
+      $('f-msg').textContent = 'Conectado.'; toast('Conectado. Cargando tus datos…'); location.hash = '#hoy'; sincronizar();
+    }).catch(function (e) { if (tk) lsSet(K.llave, antes || null); $('f-msg').textContent = e && e.code === 'llave' ? 'La llave no vale o no tiene acceso a ese repositorio.' : 'No he podido conectar. ¿Hay internet?'; });
+  }
+  else if (a === 'desconectar') { lsSet(K.llave, null); toast('Llave quitada de este aparato.'); pintar(); }
+});
+document.addEventListener('change', function (ev) { if (ev.target.id === 'f-foto') { lsSet(K.foto, ev.target.value); lsSet(K.bgf, null); fondo(); toast('Fondo cambiado.'); } });
+window.addEventListener('hashchange', function () { pintar(); window.scrollTo(0, 0); });
+document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible') sincronizar(); });
+pintar(); fondo(); sincronizar();
+if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(function () {});
+</script>
+</body>
+</html>
