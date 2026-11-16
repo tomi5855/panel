@@ -103,7 +103,7 @@ details summary::-webkit-details-marker{display:none}
 <div class="toast" id="toast" role="status" hidden></div>
 <script>
 'use strict';
-var VERSION = '1.1.0';
+var VERSION = '1.1.1';
 var K = { llave: 'panel-llave', repo: 'panel-repo', api: 'panel-api', cache: 'panel-cache-v1', foto: 'panel-foto', bgf: 'panel-bg-file', bgd: 'panel-bg-data' };
 var TRAMOS = [{ id: 'menos-5', t: 'Menos de 5 min', min: 3 }, { id: '5-10', t: '5-10 min', min: 8 }, { id: '10-30', t: '10-30 min', min: 20 }, { id: 'mas-30', t: 'Más de 30 min', min: 40 }];
 var ICO = {
@@ -396,18 +396,30 @@ function cardLista(tit, items, o) {
   if (!lista.length) h += '<div class="empty">' + esc(o.vacio || 'Nada pendiente. Bien.') + '</div>';
   lista.forEach(function (a) { var s = !!UI.acc[a.id]; h += '<div class="item"><button class="chk' + (s ? ' sel' : '') + '" data-act="acc" data-id="' + esc(a.id) + '" aria-pressed="' + s + '" aria-label="Marcar como hecha: ' + esc(a.t) + '">' + (s ? ICO.check : '') + '</button><div style="flex:1;min-width:0"><div class="t15">' + esc(a.t) + '</div><div class="m" style="margin-top:2px">' + esc(a.sub || '') + '</div></div>' + (a.cuando ? '<span class="pill">' + esc(a.cuando) + '</span>' : '') + '</div>'; });
   if (sel.length) h += '<button class="btn dark" data-act="acc-ok" data-ids="' + esc(sel.join(',')) + '" style="margin-top:8px">✓ Hecho (' + sel.length + ')</button>';
-  return h + '</section>';
+  return h + (o.extra || '') + '</section>';
+}
+
+function extraDonna(Dn) {
+  if (!Dn) return '';
+  var fila = function (x, tag) { return '<div class="item" style="align-items:center"><div style="width:58px;flex:none;text-align:center;padding:6px 0;border-radius:12px;background:rgba(255,255,255,.7);font-size:15px;font-weight:700;color:var(--accent)">' + esc(x.hora || '—') + '</div><div style="flex:1;min-width:0"><div class="t15">' + esc(x.t) + '</div><div class="m" style="margin-top:2px">' + esc(x.sub || '') + '</div></div>' + (tag ? '<span class="warn">' + tag + '</span>' : '') + '</div>'; };
+  var h = '<div class="hr"></div><div class="row"><span class="lbl">Donna · lo que toca mañana</span><span class="pill">' + (Dn.toca || []).length + '</span></div>';
+  if (!(Dn.toca || []).length) h += '<div class="empty">Nada con hora para mañana en el CRM.</div>';
+  (Dn.toca || []).forEach(function (x) { h += fila(x); });
+  h += '<div class="row" style="margin-top:6px"><span class="lbl">Donna · lo que se queda atrás</span><span class="pill">' + ((Dn.dejado || []).length + (Dn.masAtrasado || 0)) + '</span></div>';
+  (Dn.dejado || []).forEach(function (x) { h += fila(x, x.tag); });
+  if (Dn.masAtrasado) h += '<div class="m">+ ' + Dn.masAtrasado + ' más atrasadas, en Donna</div>';
+  return h + '<div class="m" style="font-size:12px">Datos de Donna del ' + esc(corta(Dn.fecha)) + '</div>';
 }
 
 function vistaTrabajo() {
   var T = D.panel.trabajo || {}, hoy = hoyIso(), h = cab('codeX y lo tuyo', 'Trabajo') + '<div class="g">';
   var TA = T.tareas || {}, Mn = TA.manana || {}, fm = Mn.fecha || addDias(hoy, 1);
   var tm = fm === addDias(hoy, 1) ? 'Mañana' : fm === hoy ? 'Hoy' : 'Tareas';
+  h += cardLista(tm, Mn.items, { sub: fechaLarga(fm), vacio: 'Sin tareas tuyas para ese día.', extra: extraDonna(Mn.donna) });
   h += cardLista('Que no se olvide', T.importante, { imp: true, sub: 'Lo importante, hasta que esté hecho', vacio: 'Nada importante pendiente.' });
-  h += cardLista(tm, Mn.items, { sub: fechaLarga(fm), vacio: 'Nada apuntado para ese día.' });
   h += cardLista('Esta semana', TA.semana, { sub: 'Lo que toca antes del domingo', vacio: 'Nada apuntado para la semana.' });
   var reu = ((D.panel.agenda || {}).semana || []).filter(function (e) { return /codeX/i.test(e.sub || ''); });
-  h += '<section class="glass card s6" style="gap:8px"><div class="row"><span class="lbl">Reuniones de la semana</span><span class="pill">' + reu.length + '</span></div>' + (reu.length ? '' : '<div class="empty">Sin reuniones de codeX marcadas esta semana.</div>') + reu.map(function (e) { return '<div style="display:flex;gap:12px;align-items:center"><div style="width:44px;text-align:center;flex:none"><div style="font-size:11px;font-weight:600;color:var(--muted)">' + esc(e.dia) + '</div><div style="font-size:20px;font-weight:700">' + esc(e.num) + '</div></div><div><div class="t15">' + esc(e.t) + '</div><div class="m">' + esc((e.hora ? e.hora + ' · ' : '') + (e.sub || '')) + '</div></div></div>'; }).join('') + '</section>';
+  h += '<section class="glass card s6" style="gap:8px"><div class="row"><span class="lbl">Reuniones de la semana</span><span class="pill">' + reu.length + '</span></div>' + (reu.length ? '' : '<div class="empty">Sin reuniones de codeX marcadas esta semana.</div>') + reu.map(function (e) { return '<div style="display:flex;gap:12px;align-items:center"><div style="width:44px;text-align:center;flex:none"><div style="font-size:11px;font-weight:600;color:var(--muted)">' + esc(e.dia) + '</div><div style="font-size:20px;font-weight:700">' + esc(e.num) + '</div></div><div style="flex:1;min-width:0"><div class="t15">' + esc(e.t) + '</div><div class="m">' + esc(e.sub || '') + '</div></div>' + (e.hora ? '<div style="flex:none;padding:8px 12px;border-radius:14px;background:rgba(255,255,255,.75);font-size:20px;font-weight:700;color:var(--accent);letter-spacing:-.01em">' + esc(e.hora) + '</div>' : '') + '</div>'; }).join('') + '</section>';
   var Sm = T.semanaCodex;
   if (Sm) h += '<section class="glass card s6"><div class="row"><span class="lbl">codeX · semana pasada</span><span class="m" style="font-size:12px">' + esc(Sm.rango) + '</span></div><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px">' + [[Sm.llamadas, 'llamadas'], [Sm.decisor, 'con decisor'], [Sm.fijadas, 'reuniones fijadas'], [Sm.hechas, 'reuniones hechas']].map(function (x) { return '<div class="tile"><div style="font-size:24px;font-weight:700">' + esc(x[0]) + '</div><div class="m" style="font-size:12px">' + x[1] + '</div></div>'; }).join('') + '</div><div style="font-size:14px;color:var(--soft)">' + esc(Sm.nota || '') + '</div>' + (T.estaSemana ? '<div class="tile" style="font-size:14px"><b>Esta semana:</b> ' + esc(T.estaSemana) + '</div>' : '') + '</section>';
   h += '<section class="glass card s6" style="gap:2px"><div class="row" style="margin-bottom:6px"><span class="lbl">A medias</span><span class="pill">' + (T.aMedias || []).length + '</span></div>' + (T.aMedias || []).map(function (a) { return '<div class="row" style="align-items:flex-start;padding:7px 0"><div><div class="t15">' + esc(a.t) + '</div><div class="m" style="margin-top:2px">' + esc(a.sub || '') + '</div></div><span class="pill">' + esc(a.tag || '') + '</span></div>'; }).join('') + '</section>';
