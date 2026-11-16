@@ -103,7 +103,7 @@ details summary::-webkit-details-marker{display:none}
 <div class="toast" id="toast" role="status" hidden></div>
 <script>
 'use strict';
-var VERSION = '1.0.2';
+var VERSION = '1.1.0';
 var K = { llave: 'panel-llave', repo: 'panel-repo', api: 'panel-api', cache: 'panel-cache-v1', foto: 'panel-foto', bgf: 'panel-bg-file', bgd: 'panel-bg-data' };
 var TRAMOS = [{ id: 'menos-5', t: 'Menos de 5 min', min: 3 }, { id: '5-10', t: '5-10 min', min: 8 }, { id: '10-30', t: '10-30 min', min: 20 }, { id: 'mas-30', t: 'Más de 30 min', min: 40 }];
 var ICO = {
@@ -294,12 +294,12 @@ function cardAgenda(P, hoy) {
 }
 function cardAccion(P) {
   var lista = (P.accion || []).filter(function (a) { return !D.hechas.items[a.id]; });
-  var ver = UI.verTodo ? lista : lista.slice(0, 5), n = Object.keys(UI.acc).filter(function (k) { return UI.acc[k]; }).length;
+  var ver = UI.verTodo ? lista : lista.slice(0, 5), selA = lista.filter(function (a) { return UI.acc[a.id]; }).map(function (a) { return a.id; }), n = selA.length;
   var h = '<section class="glass card s4" style="gap:2px"><div class="row" style="margin-bottom:6px"><span class="lbl">Pide acción</span><span class="pill">' + lista.length + '</span></div>';
   if (!lista.length) h += '<div class="empty">Nada pendiente. Bien.</div>';
   ver.forEach(function (a) { var s = !!UI.acc[a.id]; h += '<div class="item"><button class="chk' + (s ? ' sel' : '') + '" data-act="acc" data-id="' + esc(a.id) + '" aria-pressed="' + s + '" aria-label="Marcar como hecha: ' + esc(a.t) + '">' + (s ? ICO.check : '') + '</button><div><div class="t15">' + esc(a.t) + '</div><div class="m" style="margin-top:2px">' + esc(a.sub || '') + '</div></div></div>'; });
   if (lista.length > 5) h += '<button class="btn" data-act="vertodo" style="margin-top:6px">' + (UI.verTodo ? 'Ver menos' : 'Ver todo (' + lista.length + ')') + '</button>';
-  if (n) h += '<button class="btn dark" data-act="acc-ok" style="margin-top:8px">✓ Hecho (' + n + ')</button>';
+  if (n) h += '<button class="btn dark" data-act="acc-ok" data-ids="' + esc(selA.join(',')) + '" style="margin-top:8px">✓ Hecho (' + n + ')</button>';
   return h + '</section>';
 }
 function cardGasto(P, ancho) {
@@ -388,14 +388,32 @@ function graficoEvolucion(ev) {
   return s;
 }
 
+function cardLista(tit, items, o) {
+  o = o || {};
+  var lista = (items || []).filter(function (a) { return !D.hechas.items[a.id]; });
+  var sel = lista.filter(function (a) { return UI.acc[a.id]; }).map(function (a) { return a.id; });
+  var h = '<section class="glass card ' + (o.ancho || 's6') + '" style="gap:2px"><div class="row" style="margin-bottom:6px"><div><span class="lbl">' + esc(tit) + '</span>' + (o.sub ? '<div class="m" style="font-size:12px;margin-top:2px">' + esc(o.sub) + '</div>' : '') + '</div>' + (o.imp ? '<span class="warn">Imp.</span>' : '<span class="pill">' + lista.length + '</span>') + '</div>';
+  if (!lista.length) h += '<div class="empty">' + esc(o.vacio || 'Nada pendiente. Bien.') + '</div>';
+  lista.forEach(function (a) { var s = !!UI.acc[a.id]; h += '<div class="item"><button class="chk' + (s ? ' sel' : '') + '" data-act="acc" data-id="' + esc(a.id) + '" aria-pressed="' + s + '" aria-label="Marcar como hecha: ' + esc(a.t) + '">' + (s ? ICO.check : '') + '</button><div style="flex:1;min-width:0"><div class="t15">' + esc(a.t) + '</div><div class="m" style="margin-top:2px">' + esc(a.sub || '') + '</div></div>' + (a.cuando ? '<span class="pill">' + esc(a.cuando) + '</span>' : '') + '</div>'; });
+  if (sel.length) h += '<button class="btn dark" data-act="acc-ok" data-ids="' + esc(sel.join(',')) + '" style="margin-top:8px">✓ Hecho (' + sel.length + ')</button>';
+  return h + '</section>';
+}
+
 function vistaTrabajo() {
   var T = D.panel.trabajo || {}, hoy = hoyIso(), h = cab('codeX y lo tuyo', 'Trabajo') + '<div class="g">';
+  var TA = T.tareas || {}, Mn = TA.manana || {}, fm = Mn.fecha || addDias(hoy, 1);
+  var tm = fm === addDias(hoy, 1) ? 'Mañana' : fm === hoy ? 'Hoy' : 'Tareas';
+  h += cardLista('Que no se olvide', T.importante, { imp: true, sub: 'Lo importante, hasta que esté hecho', vacio: 'Nada importante pendiente.' });
+  h += cardLista(tm, Mn.items, { sub: fechaLarga(fm), vacio: 'Nada apuntado para ese día.' });
+  h += cardLista('Esta semana', TA.semana, { sub: 'Lo que toca antes del domingo', vacio: 'Nada apuntado para la semana.' });
+  var reu = ((D.panel.agenda || {}).semana || []).filter(function (e) { return /codeX/i.test(e.sub || ''); });
+  h += '<section class="glass card s6" style="gap:8px"><div class="row"><span class="lbl">Reuniones de la semana</span><span class="pill">' + reu.length + '</span></div>' + (reu.length ? '' : '<div class="empty">Sin reuniones de codeX marcadas esta semana.</div>') + reu.map(function (e) { return '<div style="display:flex;gap:12px;align-items:center"><div style="width:44px;text-align:center;flex:none"><div style="font-size:11px;font-weight:600;color:var(--muted)">' + esc(e.dia) + '</div><div style="font-size:20px;font-weight:700">' + esc(e.num) + '</div></div><div><div class="t15">' + esc(e.t) + '</div><div class="m">' + esc((e.hora ? e.hora + ' · ' : '') + (e.sub || '')) + '</div></div></div>'; }).join('') + '</section>';
   var Sm = T.semanaCodex;
   if (Sm) h += '<section class="glass card s6"><div class="row"><span class="lbl">codeX · semana pasada</span><span class="m" style="font-size:12px">' + esc(Sm.rango) + '</span></div><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px">' + [[Sm.llamadas, 'llamadas'], [Sm.decisor, 'con decisor'], [Sm.fijadas, 'reuniones fijadas'], [Sm.hechas, 'reuniones hechas']].map(function (x) { return '<div class="tile"><div style="font-size:24px;font-weight:700">' + esc(x[0]) + '</div><div class="m" style="font-size:12px">' + x[1] + '</div></div>'; }).join('') + '</div><div style="font-size:14px;color:var(--soft)">' + esc(Sm.nota || '') + '</div>' + (T.estaSemana ? '<div class="tile" style="font-size:14px"><b>Esta semana:</b> ' + esc(T.estaSemana) + '</div>' : '') + '</section>';
   h += '<section class="glass card s6" style="gap:2px"><div class="row" style="margin-bottom:6px"><span class="lbl">A medias</span><span class="pill">' + (T.aMedias || []).length + '</span></div>' + (T.aMedias || []).map(function (a) { return '<div class="row" style="align-items:flex-start;padding:7px 0"><div><div class="t15">' + esc(a.t) + '</div><div class="m" style="margin-top:2px">' + esc(a.sub || '') + '</div></div><span class="pill">' + esc(a.tag || '') + '</span></div>'; }).join('') + '</section>';
-  h += '<section class="glass card s4"><div style="display:flex;align-items:center;gap:8px">' + ICO.clock + '<span class="lbl">Se te escapa</span></div>' + ((T.seEscapa || []).length ? '' : '<div class="empty">Nada parado.</div>') + (T.seEscapa || []).map(function (a) { var d = a.desde ? difDias(a.desde, hoy) : null; return '<div class="row"><div><div class="t15">' + esc(a.t) + '</div><div class="m">' + esc(a.sub || '') + '</div></div>' + (d != null ? '<span class="warn">' + d + ' días</span>' : '') + '</div>'; }).join('') + '</section>';
   h += '<section class="glass card s4"><span class="lbl">Lo tuyo</span>' + (T.proyectos || []).map(function (p) { return '<div class="row"><div><div class="t15">' + esc(p.n) + '</div><div class="m">' + esc(p.d || '') + '</div></div><span class="' + (p.e === 'en marcha' ? 'pill' : p.e === 'parado' ? 'warn' : 'grey') + '">' + esc(p.e) + '</span></div>'; }).join('') + '</section>';
   h += '<section class="glass card s4"><div class="row"><span class="lbl">Ideas en desarrollo</span><span style="font-size:13px;font-weight:600;color:var(--accent)">Aparcadas · ' + (T.aparcadas || []).length + '</span></div>' + (T.ideas || []).map(function (i) { return '<div class="tile"><div class="t15">' + esc(i.t) + '</div><div class="m" style="margin-top:2px">' + esc(i.sub || '') + '</div></div>'; }).join('') + '</section>';
+  h += '<section class="glass card s4" style="opacity:.82"><div style="display:flex;align-items:center;gap:8px">' + ICO.clock + '<span class="lbl">Se te escapa</span></div>' + ((T.seEscapa || []).length ? '' : '<div class="empty">Nada parado.</div>') + (T.seEscapa || []).map(function (a) { var d = a.desde ? difDias(a.desde, hoy) : null; return '<div class="row"><div><div class="t15" style="font-size:14px">' + esc(a.t) + '</div><div class="m">' + esc(a.sub || '') + '</div></div>' + (d != null ? '<span class="warn">' + d + ' días</span>' : '') + '</div>'; }).join('') + '</section>';
   return h + '</div>';
 }
 
@@ -405,6 +423,7 @@ function vistaYo() {
   h += '<section class="glass card s6" style="gap:16px"><div class="row"><span class="lbl">Hábitos · esta semana</span><a href="#habitos" style="font-size:13px;font-weight:600;text-decoration:none">Apuntar y gráficos</a></div><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px">';
   habitos().forEach(function (x) { var n = semana(lun, x.id), f = Math.min(1, n / x.dias_semana) * c; h += '<a href="#habitos" style="display:flex;flex-direction:column;align-items:center;gap:6px;text-decoration:none;color:inherit"><div style="position:relative;width:96px;height:96px"><svg width="96" height="96" viewBox="0 0 96 96" aria-hidden="true"><circle cx="48" cy="48" r="40" fill="none" stroke="rgba(19,38,58,.1)" stroke-width="9"/><circle cx="48" cy="48" r="40" fill="none" stroke="#5BBCF2" stroke-width="9" stroke-linecap="round" stroke-dasharray="' + f.toFixed(1) + ' ' + c.toFixed(1) + '" transform="rotate(-90 48 48)"/></svg><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:21px;font-weight:700">' + n + '/' + x.dias_semana + '</div></div><div style="font-size:14px;font-weight:600;text-align:center">' + esc(x.nombre) + '</div></a>'; });
   h += '</div><a class="btn dark" href="#habitos" style="display:flex;align-items:center;justify-content:center;text-decoration:none">Apuntar lo de hoy</a></section>';
+  h += cardLista('Pendientes', Y.pendientes, { sub: 'Lo tuyo de fuera del trabajo', vacio: 'Nada pendiente.' });
   var items = Object.keys(D.reac.items).map(function (k) { var r = D.reac.items[k]; r.id = k; return r; });
   var mucho = items.filter(function (r) { return r.nivel === 'mucho'; }).sort(function (a, b) { return a.fecha < b.fecha ? -1 : 1; });
   var repaso = mucho.filter(function (r) { return difDias(r.fecha, hoy) >= 3 && !r.repasado; })[0];
@@ -480,10 +499,10 @@ document.addEventListener('click', function (ev) {
   if (a === 'acc') { UI.acc[id] = !UI.acc[id]; pintar(); }
   else if (a === 'vertodo') { UI.verTodo = !UI.verTodo; pintar(); }
   else if (a === 'acc-ok') {
-    var ids = Object.keys(UI.acc).filter(function (k) { return UI.acc[k]; }), ahora = new Date().toISOString();
-    ids.forEach(function (k) { D.hechas.items[k] = { fecha: ahora }; }); UI.acc = {}; guardar(); pintar();
+    var gr = b.getAttribute('data-ids'), ids = gr ? gr.split(',') : Object.keys(UI.acc).filter(function (k) { return UI.acc[k]; }), ahora = new Date().toISOString();
+    ids.forEach(function (k) { D.hechas.items[k] = { fecha: ahora }; delete UI.acc[k]; }); guardar(); pintar();
     toast(ids.length === 1 ? 'Hecha. Claude la quita de tus pendientes.' : ids.length + ' hechas. Claude las quita de tus pendientes.');
-    subir('hechas', 'panel: hecho en Pide acción');
+    subir('hechas', 'panel: tareas hechas');
   }
   else if (a === 'reac') {
     var p = D.panel.pildora, n = b.getAttribute('data-n');
