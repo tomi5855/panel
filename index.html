@@ -103,7 +103,7 @@ details summary::-webkit-details-marker{display:none}
 <div class="toast" id="toast" role="status" hidden></div>
 <script>
 'use strict';
-var VERSION = '1.1.1';
+var VERSION = '1.1.2';
 var K = { llave: 'panel-llave', repo: 'panel-repo', api: 'panel-api', cache: 'panel-cache-v1', foto: 'panel-foto', bgf: 'panel-bg-file', bgd: 'panel-bg-data' };
 var TRAMOS = [{ id: 'menos-5', t: 'Menos de 5 min', min: 3 }, { id: '5-10', t: '5-10 min', min: 8 }, { id: '10-30', t: '10-30 min', min: 20 }, { id: 'mas-30', t: 'Más de 30 min', min: 40 }];
 var ICO = {
@@ -218,7 +218,7 @@ function pintarSync(txt) {
   var el = $('sync'); if (!el) return;
   if (txt) { el.textContent = txt; return; }
   if (!llave()) { el.innerHTML = 'Sin conectar. <a href="#ajustes">Conéctalo en Ajustes</a>.'; return; }
-  var p = D.panel ? 'Datos de Claude del ' + corta(D.panel.hoy) : 'Sin datos aún';
+  var p = D.panel ? 'Datos de Claude del ' + corta(D.panel.hoy) + (D.panel.generado ? ' (' + new Date(D.panel.generado).toTimeString().slice(0, 5) + ')' : '') : 'Sin datos aún';
   var s = D.sync ? ' · revisado a las ' + new Date(D.sync).toTimeString().slice(0, 5) : '';
   el.textContent = p + s + (Object.keys(D.pend).length ? ' · cambios por subir' : '');
 }
@@ -550,6 +550,7 @@ document.addEventListener('click', function (ev) {
 });
 document.addEventListener('change', function (ev) { if (ev.target.id === 'f-foto') { lsSet(K.foto, ev.target.value); lsSet(K.bgf, null); fondo(); toast('Fondo cambiado.'); } });
 window.addEventListener('hashchange', function () { pintar(); window.scrollTo(0, 0); });
+setInterval(function () { if (document.visibilityState === 'visible' && ruta() !== 'ajustes') sincronizar(); }, 600000);
 document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible') sincronizar(); });
 pintar(); fondo(); sincronizar();
 if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(function () {});
